@@ -2,9 +2,9 @@
 
 namespace NSPersonalCloud.StorageClient.Azure
 {
-    public class AzureTransferProgressArgs : EventArgs
+    public class AzureTransferProgressEventArgs : EventArgs
     {
-        public AzureTransferProgressArgs(long transferred, long total)
+        public AzureTransferProgressEventArgs(long transferred, long total)
         {
             TransferredBytes = transferred;
             TotalBytes = total;

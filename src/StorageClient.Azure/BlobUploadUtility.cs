@@ -1,6 +1,7 @@
 ﻿using Azure;
 using Azure.Storage;
 using Azure.Storage.Blobs.Models;
+
 using System;
 using System.IO;
 using System.Threading;
@@ -16,11 +17,13 @@ namespace NSPersonalCloud.StorageClient.Azure
             string objectName,
             Stream streamToUpload,
             StorageTransferOptions transferOptions = default(StorageTransferOptions),
-            EventHandler<AzureTransferProgressArgs> transferProgress = null,
+            EventHandler<AzureTransferProgressEventArgs> transferProgress = null,
             CancellationToken cancellationToken = default(CancellationToken)
             )
         {
             if (clientBuilder == null) throw new ArgumentNullException(nameof(clientBuilder));
+            if (streamToUpload is null) throw new ArgumentNullException(nameof(streamToUpload));
+
             var client = clientBuilder.GetBlobContainerClient(blobName).GetBlobClient(objectName);
 
             long streamLength = 0;
@@ -38,13 +41,13 @@ namespace NSPersonalCloud.StorageClient.Azure
 
     internal class AzureTransferProgressAdapter : IProgress<long>
     {
-        private long _StreamLength;
-        private EventHandler<AzureTransferProgressArgs> _EventHandler;
+        private readonly long _StreamLength;
+        private readonly EventHandler<AzureTransferProgressEventArgs> _EventHandler;
 
         public AzureTransferProgressAdapter
             (
             long streamLength,
-            EventHandler<AzureTransferProgressArgs> eventHandler
+            EventHandler<AzureTransferProgressEventArgs> eventHandler
             )
         {
             _StreamLength = streamLength;
@@ -53,7 +56,7 @@ namespace NSPersonalCloud.StorageClient.Azure
 
         public void Report(long value)
         {
-            _EventHandler.Invoke(this, new AzureTransferProgressArgs(value, _StreamLength));
+            _EventHandler.Invoke(this, new AzureTransferProgressEventArgs(value, _StreamLength));
         }
     }
 }
